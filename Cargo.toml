@@ -1,0 +1,21 @@
+[package]
+name = "quire-walk"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Shared no_std walker toolkit: an explicit heap stack of typed frames and a children-first arena."
+authors = ["Agent IX <peter@agent-ix.ai>"]
+license = "AGPL-3.0-or-later"
+repository = "https://github.com/agent-ix/quire-walk"
+
+[lib]
+name = "quire_walk"
+path = "src/lib.rs"
+
+[dependencies]
+
+[dev-dependencies]
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
