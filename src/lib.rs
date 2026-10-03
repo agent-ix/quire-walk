@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `quire-walk`: the shared `no_std` walker toolkit (ADR-011 §6.1 layer W,
-//! ADR-030 D-1 item 2).
+//! `quire-walk`: a `no_std` walker toolkit for nested structures.
 //!
 //! A walk over a nested structure never uses native recursion in
 //! proportion to its input. It takes one of two shapes:
@@ -14,9 +13,9 @@
 //!   after its children, and compute over it with one forward loop
 //!   ([`Arena::bottom_up`]). No stack at all.
 //!
-//! The crate depends on `core` and `alloc` only and has no features, so
-//! QSL, IR, CG and RT can all depend on it (ADR-011 FB-05's shared-leaf
-//! class).
+//! The crate depends on `core` and `alloc` only and has no features, so any
+//! `no_std` crate can depend on it without feature unification pulling in
+//! anything else.
 //!
 //! # Example
 //!
