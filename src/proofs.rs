@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Kani harnesses for the traversal (`cargo kani -p quire-walk`).
+//! Kani harnesses for the traversal (`cargo kani`).
 //!
 //! The harnesses together cover every ordered tree of at most
 //! [`MAX_NODES`] nodes: one harness per parent array (node 0 is the root
@@ -165,6 +165,7 @@ impl Walk for Recorder {
 /// The complete walk over `tree` enters and exits every node exactly once,
 /// each exit with its enter's frame, properly nested along every path,
 /// siblings in push order, and returns `Continue`.
+/// Trace: TC-899, FR-356-AC-4
 fn check_complete_walk(tree: Tree) {
     let mut recorder = Recorder::new(tree);
     assert!(walk(&mut recorder, 0) == ControlFlow::Continue(()));
@@ -199,6 +200,7 @@ fn check_complete_walk(tree: Tree) {
 /// A stop on entering, then on exiting, each node of `tree` is returned at
 /// once, and no callback runs after it (the recorder asserts that in every
 /// callback).
+/// Trace: TC-899, FR-356-AC-4
 fn check_stops(tree: Tree) {
     for stop in 0..MAX_NODES {
         if stop >= tree.nodes {
@@ -230,6 +232,7 @@ struct Node {
 /// have a result, and the root's size is the node count. An id of another
 /// arena, at a position this arena holds, is never answered, during the
 /// loop or from the returned results.
+/// Trace: TC-899, FR-356-AC-4
 fn check_arena(tree: Tree) {
     let nodes = tree.nodes;
     // Tree nodes are pushed from the last to the first, since every child

@@ -14,11 +14,11 @@ Verify that the walker toolkit `quire-walk` is a `no_std` shared leaf, that it e
 every node of a 100,000-deep tree in order with typed frames, that a stop
 ends the walk, and that arena order computes bottom-up with no stack.
 
-Scope: FR-356-AC-1, FR-356-AC-2, FR-356-AC-3.
+Scope: FR-356-AC-1, FR-356-AC-2, FR-356-AC-3, FR-356-AC-5.
 
 ## Test Procedure
 
-Run steps 2 to 5 on a thread spawned with a 512 KiB stack.
+Run steps 2 to 6 on a thread spawned with a 512 KiB stack.
 
 1. Build `quire-walk` for `thumbv7em-none-eabi`, and list its features
    and its dependency tree.
@@ -30,6 +30,8 @@ Run steps 2 to 5 on a thread spawned with a 512 KiB stack.
    50,000 with a value.
 5. Compute each node's subtree size over a 100,000-node arena in one forward
    loop.
+6. Read an id of another arena, in range and past the end, through
+   `Arena::get`, the results view and the returned results.
 
 ## Expected Results
 
@@ -39,7 +41,8 @@ Run steps 2 to 5 on a thread spawned with a 512 KiB stack.
   post-order, and each exit's frame equals its enter's frame.
 - Step 4: the walk returns the value, and no callback runs after the stop.
 - Step 5: the root's size is 100,000.
+- Step 6: every foreign id reads as `None`.
 
 ## Status
 
-Implemented. Step 1 is backed by `make build-no-std` and `tests/it/leaf.rs`; steps 2 to 5 by `tests/it/deep.rs`.
+Implemented. Step 1 is backed by `make build-no-std` and `tests/it/leaf.rs`; steps 2 to 6 by `tests/it/deep.rs`.

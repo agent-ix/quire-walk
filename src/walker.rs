@@ -78,8 +78,7 @@ enum Task<N, F> {
 ///
 /// Native stack use is constant. The heap stack holds one frame per entered
 /// node not yet exited and one entry per named child not yet entered, so its
-/// size is bounded by the nodes the walk names, which the calling stage
-/// charges (ADR-030 D-1 item 3).
+/// size is bounded by the nodes the walk names.
 pub fn walk<W: Walk + ?Sized>(walker: &mut W, root: W::Node) -> ControlFlow<W::Stop> {
     let mut tasks: Vec<Task<W::Node, W::Frame>> = Vec::new();
     tasks.push(Task::Enter(root));

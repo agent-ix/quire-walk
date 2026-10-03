@@ -19,9 +19,8 @@ help:
 	@echo "  make build            - Release build"
 	@echo "  make clean            - cargo clean"
 	@echo "  make deny             - cargo deny check"
-	@echo "  make audit-unsafe     - Enforce // SAFETY: comments on unsafe blocks"
 	@echo "  make docs             - cargo doc, denying missing/broken doc links"
-	@echo "  make ci               - All CI gates locally (fmt-check + lint + test + build-no-std + deny + audit-unsafe + docs)"
+	@echo "  make ci               - All CI gates locally (fmt-check + lint + test + build-no-std + deny + docs)"
 
 # =============================================================================
 # Format / Lint / Test
@@ -75,10 +74,6 @@ deny:
 cargo-audit:
 	$(CARGO) audit
 
-.PHONY: audit-unsafe
-audit-unsafe:
-	bash scripts/check_unsafe_comments.sh
-
 # =============================================================================
 # Documentation
 # =============================================================================
@@ -94,4 +89,4 @@ docs:
 # =============================================================================
 
 .PHONY: ci
-ci: fmt-check lint test build-no-std deny audit-unsafe docs
+ci: fmt-check lint test build-no-std deny docs

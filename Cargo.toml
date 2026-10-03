@@ -3,7 +3,7 @@ name = "quire-walk"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.98"
-description = "ADR-011 §6.1 layer W: the shared no_std walker toolkit -- an explicit heap stack of typed frames with enter and exit callbacks, and an arena that stores each node after its children."
+description = "The shared no_std walker toolkit -- an explicit heap stack of typed frames with enter and exit callbacks, and an arena that stores each node after its children."
 authors = ["Agent IX <peter@agent-ix.ai>"]
 license = "AGPL-3.0-or-later"
 repository = "https://github.com/agent-ix/quire-walk"
@@ -13,9 +13,8 @@ publish = false
 name = "quire_walk"
 path = "src/lib.rs"
 
-# Layer W is a shared leaf (ADR-011 FB-05): no dependency beyond `core` and
-# `alloc`, and no features, so feature unification can bring neither `std`
-# nor `stacker` into it.
+# A shared leaf: no dependency beyond `core` and `alloc`, and no features, so
+# feature unification cannot bring `std` or any other crate into it.
 [dependencies]
 
 [dev-dependencies]

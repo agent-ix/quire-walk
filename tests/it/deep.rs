@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! TC-898 steps 2 to 5: the walker toolkit and arena order over
+//! TC-898 steps 2 to 6: the walker toolkit and arena order over
 //! 100,000-deep trees, each on a thread with a 512 KiB stack. A walk that
 //! recursed per level would overflow that stack and abort the test
 //! process, so reaching `join` is the stack-safety evidence.
@@ -294,7 +294,7 @@ fn tc_898_a_100k_node_arena_computes_subtree_sizes_in_one_forward_loop() {
 /// `Arena::get`, from the results view during `bottom_up` and from the
 /// results it returns, whether its position is in range or past the end,
 /// and so does an id of the arena a clone was made from.
-#[trace("TC-898", "FR-356-AC-3")]
+#[trace("TC-898", "FR-356-AC-5")]
 #[test]
 fn tc_898_a_foreign_id_reads_as_none_in_range_or_not() {
     let mut other: Arena<Term> = Arena::new();
