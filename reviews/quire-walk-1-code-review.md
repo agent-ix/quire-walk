@@ -49,3 +49,18 @@ closed in QSL. FND-002 to FND-004 are low.
 | FND-002 | low | `.github/workflows/ci.yml` does not match `make ci`. It skips `build-no-std` and the thumbv7em clippy pass, and it runs `cargo deny check licenses`, while the Makefile runs a full `cargo deny check`, so the `allow-git` source rule is never exercised in the workflow. The no_std build is covered only by local `make ci`. Fix: have the workflow run `make ci`. Workflow edits need Peter's clearance first. | .github/workflows/ci.yml:24-57; Makefile:38-56,97 |
 | FND-003 | low | The unsafe-comment audit guards nothing. `[lints.rust] unsafe_code = "forbid"` already refuses every `unsafe` block, so `scripts/check_unsafe_comments.sh`, the empty `scripts/unsafe_comment_baseline.txt`, `make audit-unsafe`, the CI "Unsafe audit" step and the CLAUDE.md paragraph about them are scaffold ceremony. Fix: delete them. | Cargo.toml:30; scripts/check_unsafe_comments.sh; scripts/unsafe_comment_baseline.txt; Makefile; CLAUDE.md:25 |
 | FND-004 | low | QSL-specific wording came along into the standalone crate. The Cargo.toml comment says feature unification cannot bring "`std` nor `stacker`" into it (`stacker` is QSL's `qsl-walk-grow` concern). The walker.rs doc says the stack is bounded by nodes "the calling stage charges (ADR-030 D-1 item 3)". The proofs.rs doc says `cargo kani -p quire-walk` (QSL workspace form). The package `description` leads with "ADR-011 §6.1 layer W". Fix: state the toolkit's own bound (one frame per entered node not yet exited, plus one entry per named child not yet entered) and drop the QSL-internal labels. | Cargo.toml:6,16-18; src/walker.rs:79-82; src/proofs.rs:2 |
+
+## New findings (disposition pass 1)
+
+| ID | Severity | Summary | Refs |
+| --- | --- | --- | --- |
+| FND-005 | low | CLAUDE.md still says "`rust-toolchain.toml` pins to stable + rustfmt + clippy". The file pins `1.98.1` and the `thumbv7em-none-eabi` target. The line is scaffold text, missed in the review pass. | CLAUDE.md:25; rust-toolchain.toml:2-4 |
+
+## Dispositions
+
+| FND | outcome | sha/reason |
+| --- | --- | --- |
+| FND-001 | deferred | Fixable only in quire-spec-language: origin/main still has quire-walk/, tests/it/quire_walk_leaf.rs. The QSL follow-up takes the git dependency and deletes the copy; it needs a ticket. |
+| FND-002 | still-open | Awaiting owner: ci.yml is unchanged (no build-no-std, deny licenses only). A workflow edit needs Peter's clearance. |
+| FND-003 | still-open | Partly fixed in e8d5c82: the script, baseline, make target and CLAUDE.md paragraph are gone. ci.yml:30-31 still runs `bash scripts/check_unsafe_comments.sh`, which now fails, because the file is deleted. Awaiting owner (workflow edit). |
+| FND-004 | fixed | e8d5c82 |

@@ -38,3 +38,10 @@ Approve with findings: one medium, a small in-PR fix (FND-001), and one low.
 | --- | --- | --- | --- |
 | FND-001 | medium | FR-356-AC-4 has no backing symbol, so coverage is 3/4 while the FR says "Implemented". The harnesses are the evidence, so tag them in place. Do not add a pseudo-test, and do not add `ix-trace-rs` to `[dependencies]`, which would break AC-1. `quire coverage` reads comment forms (`rust-comment-id`, `rust-doc-comment-id`), so put a `// Trace: TC-899, FR-356-AC-4` line on `check_complete_walk`, `check_stops` and `check_arena` in src/proofs.rs. Then re-run `quire coverage --scope .` and confirm 4/4, since the scanner may skip `cfg(kani)` items. | src/proofs.rs:168,202,233; spec/functional/FR-356-walk-nested-structures-through-one-iterative-walker-toolkit.md:62 |
 | FND-002 | low | `tc_898_a_foreign_id_reads_as_none_in_range_or_not` is tagged FR-356-AC-3, but AC-3 is the 100k forward-loop computation. The foreign-id behaviour of `Arena::get` and `Results`/`Computed` has no AC: only TC-899's Kani bound mentions it. Fix: add an FR-356 AC for "an id of another arena reads as `None`" and retag the test to it. | tests/it/deep.rs:297-345; src/arena.rs:154-160 |
+
+## Dispositions
+
+| FND | outcome | sha/reason |
+| --- | --- | --- |
+| FND-001 | still-open | The tag landed in e8d5c82 (`/// Trace: TC-899, FR-356-AC-4` at src/proofs.rs:168,203,235). `quire coverage` skips `cfg(kani)` items, so it still reports 4/5 with AC-4 unbacked. Awaiting owner: a quire-rs scanner fix, which needs a ticket. Nothing left to do in quire-walk. |
+| FND-002 | fixed | e8d5c82 |
