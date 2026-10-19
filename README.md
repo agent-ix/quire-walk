@@ -6,9 +6,8 @@ keeps its own stack of frames on the heap.
 
 A tree walk is usually written as a function that calls itself for each child.
 That is one native stack frame per level, so an input that nests deeply enough
-(a rule with 100,000 chained operators, say) overflows the stack and aborts the
-process. Quire's parsers, checkers and evaluators read input they did not write,
-so none of them can afford that. `quire-walk` is the shared piece that removes
+(an expression with 100,000 nested operators, say) overflows the stack and aborts the
+process. The Quire tools read input they did not write, so they cannot afford that. `quire-walk` is the shared piece that removes
 the problem: you describe what to do when a node is entered and when it is left,
 and the toolkit runs the traversal from a loop. Native stack use is constant at
 any depth.
