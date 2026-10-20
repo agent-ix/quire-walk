@@ -1,16 +1,14 @@
 # quire-walk
 
-Walk a deeply nested structure without using the call stack, and compute over
-one without any stack at all. `quire-walk` is a small `no_std` Rust toolkit that
-keeps its own stack of frames on the heap.
+`quire-walk` is a small `no_std` Rust toolkit for traversing deeply nested
+structures. It keeps its own stack of frames on the heap, so native stack use is
+constant at any depth.
 
-A tree walk is usually written as a function that calls itself for each child.
-That is one native stack frame per level, so an input that nests deeply enough
-(an expression with 100,000 nested operators, say) overflows the stack and aborts the
-process. The Quire tools read input they did not write, so they cannot afford that. `quire-walk` is the shared piece that removes
-the problem: you describe what to do when a node is entered and when it is left,
-and the toolkit runs the traversal from a loop. Native stack use is constant at
-any depth.
+You describe what to do when a node is entered and when it is left, and the
+toolkit runs the traversal from a loop. It also computes bottom-up results over
+an arena of nodes with no stack at all. The Quire tools use it to read input
+they did not write, such as an expression with 100,000 nested operators, which
+would overflow the native stack under a recursive tree walk.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/hero-dark.svg">
@@ -20,9 +18,9 @@ any depth.
 > **Status: public prerelease.** The API is still changing and the crate is not
 > published (`publish = false`); depend on it by git. Expect breaking changes.
 
-## A first walk
+## Usage
 
-The smallest real use is the doc-test in [`src/lib.rs`](src/lib.rs). It counts
+The doc-test in [`src/lib.rs`](src/lib.rs) counts
 the nodes of a tree held as lists of child indexes, then stops early at a named
 node:
 
@@ -70,7 +68,7 @@ let mut find = Count { tree: &tree, entered: 0, stop_at: Some(2) };
 assert_eq!(walk(&mut find, 0), ControlFlow::Break("found"));
 ```
 
-## How a walk runs
+## Walk order
 
 You implement the `Walk` trait, which declares three types and two callbacks:
 
@@ -91,19 +89,19 @@ are dropped.
 
 The figure shows the walk from the example above. The heap stack holds one
 frame for each node entered but not yet exited, plus one entry for each child
-named but not yet entered, so its size follows the nodes the walk names and
-never the call depth.
+named but not yet entered. Its size follows the nodes the walk names and is
+independent of call depth.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/order-dark.svg">
   <img alt="A walk of the tree where node 0 has children 1 and 2 and node 2 has child 3 enters 0, 1, 2, 3 and exits 1, 3, 2, 0: each node is entered before its children and exited after all of them. The heap stack holds at most three tasks." src="docs/images/order-light.svg">
 </picture>
 
-A walk over several kinds of node (expressions that hold types, and types that
-hold expressions) declares an enum for `Node` and one for `Frame`, with a
+A walk over several kinds of node, such as expressions that hold types and types
+that hold expressions, declares an enum for `Node` and one for `Frame`, with a
 variant per kind, so each level carries a frame of its own kind.
 
-## Bottom-up with an arena
+## Bottom-up arena
 
 When a result depends only on a node's children, no stack is needed. An
 `Arena<T>` is one vector in which every node is stored after its children.
@@ -117,13 +115,13 @@ children's finished results through `Results::get`.
   <img alt="An Arena stores each node after its children, so a node's children always have lower positions. Arena::bottom_up visits the nodes once, in order, and each node reads its children's finished results: no stack and no recursion." src="docs/images/arena-light.svg">
 </picture>
 
-Two properties keep the arena safe to share:
+The arena has two properties:
 
 - `Clone`, `PartialEq`, `Debug` and drop all run over the flat vector, so none
   of them recurse in proportion to depth.
 - Each arena has its own token and every `Id` carries it. `Arena::get`,
   `Results::get` and `Computed::get` return `None` for an id from another
-  arena, a clone included, so a foreign id never reads some other node.
+  arena, a clone included, so an id never reads a node of another arena.
 
 ## Reference
 
@@ -138,16 +136,16 @@ Two properties keep the arena safe to share:
 
 The crate has no dependencies beyond `core` and `alloc`, no cargo features, and
 forbids `unsafe` code, so any `no_std` crate can depend on it without feature
-unification pulling anything else in. The tests in [`tests/it`](tests/it) walk
+unification adding anything else. The tests in [`tests/it`](tests/it) walk
 100,000-deep chains and build 100,000-node arenas on a thread with a 512 KiB
-stack, and check that the crate really has no features and no dependencies.
+stack, and check that the crate has no features and no dependencies.
 [`src/proofs.rs`](src/proofs.rs) holds bounded-model-checking harnesses for
 [Kani](https://github.com/model-checking/kani).
 
-## The Quire ecosystem
+## Quire ecosystem
 
-`quire-walk` is a foundation library: it sits at the bottom of the Quire
-repositories and depends on no other. [quire-spec-language](https://github.com/agent-ix/quire-spec-language)
+`quire-walk` is a foundation library at the bottom of the Quire repositories.
+It depends on no other Quire repository. [quire-spec-language](https://github.com/agent-ix/quire-spec-language)
 uses it for its deep traversals.
 
 <picture>
@@ -155,20 +153,24 @@ uses it for its deep traversals.
   <img alt="The Quire repositories. The main chain runs from the standard, quire-specification, to the compiler, quire-spec-language, then quire-contract-ir, quire-contract-codegen and quire-contract-runtime. quire-spec-language also feeds quire-protocol, and quire-contract-ir feeds quire-analyze. quire-observation feeds quire-protocol and quire-mltl. Above the chain, quire-driver runs it, quire-integration tests it and quire-verification plans verification. Below it, shared libraries used throughout: quire-exact, quire-semantic-value, quire-walk, quire-canonical and quire-verification-contracts." src="docs/images/ecosystem-light.svg">
 </picture>
 
-## Building and contributing
+## Building and testing
 
-The Makefile wraps the usual gates:
+The Makefile provides these gates:
 
 | Command | What it does |
 | --- | --- |
 | `make test` | `cargo test`, including the 100,000-deep stack-safety tests. |
 | `make lint` | Clippy with warnings denied, also for a bare-metal target. |
-| `make build-no-std` | Builds for `thumbv7em-none-eabi` to prove nothing from `std` is pulled in. |
+| `make build-no-std` | Builds for `thumbv7em-none-eabi` to check that nothing from `std` is used. |
 | `make kani` | Runs the Kani proof harnesses; needs `cargo-kani`, not part of `ci`. |
 | `make ci` | Format check, lint, tests, no-std build, `cargo deny` and docs. |
 
-Run `make ci` locally before opening a pull request. Contributions need the
-[CLA](CLA.md); see [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
+Run `make ci` locally before opening a pull request.
+
+## Contributing
+
+Contributions need the [CLA](CLA.md). See [CONTRIBUTING.md](CONTRIBUTING.md) and
+[AGENTS.md](AGENTS.md).
 
 ## License
 
