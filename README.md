@@ -4,11 +4,10 @@
 structures. It keeps its own stack of frames on the heap, so native stack use is
 constant at any depth.
 
-You describe what to do when a node is entered and when it is left, and the
-toolkit runs the traversal from a loop. It also computes bottom-up results over
-an arena of nodes with no stack at all. The Quire tools use it to read input
-they did not write, such as an expression with 100,000 nested operators, which
-would overflow the native stack under a recursive tree walk.
+You supply handlers for entering and leaving a node, and the toolkit runs the
+traversal in a loop. It also computes bottom-up results over an arena of nodes
+without a stack. The Quire tools use it on deeply nested input, such as an
+expression with 100,000 nested operators.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/hero-dark.svg">
@@ -144,7 +143,7 @@ stack, and check that the crate has no features and no dependencies.
 
 ## Quire ecosystem
 
-`quire-walk` is a foundation library at the bottom of the Quire repositories.
+`quire-walk` is at the bottom of the Quire dependency graph.
 It depends on no other Quire repository. [quire-spec-language](https://github.com/agent-ix/quire-spec-language)
 uses it for its deep traversals.
 
