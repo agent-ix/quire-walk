@@ -59,24 +59,59 @@ pub struct Children<'a, N> {
 
 impl<N> Children<'_, N> {
     /// Name `node` as the next child to enter.
+    ///
+    /// A refusal is recorded rather than returned; use [`Children::try_push`]
+    /// or [`Children::refused`] to see it.
     pub fn push(&mut self, node: N) {
-        if self.refusal.is_some() {
-            return;
+        // The refusal is already recorded for the walk to return.
+        let _ = self.try_push(node);
+    }
+
+    /// Name `node` as the next child to enter, or return the refusal.
+    ///
+    /// The refusal is the one [`walk_reserved`] returns when this `enter`
+    /// ends. Once any push is refused, every later push returns the same
+    /// refusal and names nothing. An `enter` that does work of its own
+    /// after naming its children uses this, or [`Children::refused`], to
+    /// stop that work, because the walk cannot interrupt a running `enter`.
+    ///
+    /// # Errors
+    ///
+    /// The [`Refusal`] of this or an earlier push of the same `enter`.
+    pub fn try_push(&mut self, node: N) -> Result<(), Refusal> {
+        if let Some(refusal) = *self.refusal {
+            return Err(refusal);
         }
         match grow(self.reservation, self.pending, 1) {
-            Ok(()) => self.pending.push(node),
-            Err(refusal) => *self.refusal = Some(refusal),
+            Ok(()) => {
+                self.pending.push(node);
+                Ok(())
+            }
+            Err(refusal) => {
+                *self.refusal = Some(refusal);
+                Err(refusal)
+            }
         }
+    }
+
+    /// Whether a push of this `enter` was refused, so that the walk will end
+    /// with the refusal once `enter` returns.
+    #[must_use]
+    pub fn refused(&self) -> bool {
+        self.refusal.is_some()
     }
 }
 
 impl<N> Extend<N> for Children<'_, N> {
-    /// Name each node in turn. Each is a [`Children::push`] rather than a
-    /// bulk reserve from the iterator's size hint, so the growth the
+    /// Name each node in turn, stopping at the first refusal without pulling
+    /// another node from `nodes`. Each is a [`Children::try_push`] rather
+    /// than a bulk reserve from the iterator's size hint, so the growth the
     /// reservation sees does not depend on the hint.
     fn extend<I: IntoIterator<Item = N>>(&mut self, nodes: I) {
         for node in nodes {
-            self.push(node);
+            if self.try_push(node).is_err() {
+                break;
+            }
         }
     }
 }
@@ -129,7 +164,10 @@ pub fn walk<W: Walk + ?Sized>(walker: &mut W, root: W::Node) -> ControlFlow<W::S
 /// returns that [`Refusal`] and does nothing further: no later callback
 /// runs, the refused growth allocates nothing, and both lists are dropped.
 /// A refusal found while `enter` runs takes precedence over the
-/// [`ControlFlow`] that `enter` returns.
+/// [`ControlFlow`] that `enter` returns. The walk cannot interrupt a running
+/// `enter`: it runs to completion, and an `enter` that charges or allocates
+/// after naming children checks [`Children::refused`] (or uses
+/// [`Children::try_push`]) to stop its own work.
 ///
 /// With a reservation that admits exactly the total of a complete walk's
 /// charges, the walk completes with the same visit order as [`walk`]; with

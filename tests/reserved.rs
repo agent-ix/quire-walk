@@ -271,8 +271,21 @@ fn a_deep_input_walks_and_refuses_on_a_small_stack() {
             assert_eq!(requests, full.asked);
             assert_eq!(live, 0);
 
-            // One byte short of the whole walk refuses at its last growth.
+            // The exact total completes with nothing left over.
             let total: usize = full.asked.iter().sum();
+            let mut exact = Budget::new(total);
+            let mut chain = Chain {
+                len: DEPTH,
+                entered: 0,
+                exited: 0,
+            };
+            assert_eq!(
+                walk_reserved(&mut chain, 0, &mut exact),
+                Ok(ControlFlow::Continue(()))
+            );
+            assert_eq!(exact.remaining, 0);
+
+            // One byte short of the whole walk refuses at its last growth.
             let mut short = Budget::new(total - 1);
             let mut chain = Chain {
                 len: DEPTH,
@@ -287,4 +300,76 @@ fn a_deep_input_walks_and_refuses_on_a_small_stack() {
         .expect("spawn a 512 KiB thread")
         .join()
         .expect("the reserved walk must not overflow a 512 KiB stack");
+}
+
+/// Draws from a pool its walker also draws from.
+struct Pool<'p>(&'p Cell<usize>);
+
+impl Reservation for Pool<'_> {
+    fn reserve(&mut self, bytes: usize) -> Result<(), Denied> {
+        let left = self.0.get().checked_sub(bytes).ok_or(Denied)?;
+        self.0.set(left);
+        Ok(())
+    }
+}
+
+/// Names ten children, then charges `WORK` of its own from the pool unless
+/// the push was refused.
+struct Worker<'p> {
+    pool: &'p Cell<usize>,
+    pulled: usize,
+    worked: usize,
+}
+
+const WORK: usize = 1;
+
+impl Walk for Worker<'_> {
+    type Node = usize;
+    type Frame = ();
+    type Stop = ();
+
+    fn enter(&mut self, node: usize, children: &mut Children<'_, usize>) -> ControlFlow<(), ()> {
+        if node == 0 {
+            let pulled = &mut self.pulled;
+            children.extend((1..=10).inspect(|_| *pulled += 1));
+            if !children.refused() {
+                self.pool.set(self.pool.get() - WORK);
+                self.worked += 1;
+            }
+        }
+        ControlFlow::Continue(())
+    }
+
+    fn exit(&mut self, _frame: ()) -> ControlFlow<()> {
+        ControlFlow::Continue(())
+    }
+}
+
+#[trace("TC-898", "FR-356-AC-6")]
+#[test]
+fn an_enter_sees_the_refusal_and_stops_its_own_charge() {
+    let word = core::mem::size_of::<usize>();
+    // The task stack takes its first growth (4 tasks), then the pending
+    // list grows to 4 and 8; the third growth (16, at the ninth child) is
+    // refused while `WORK` bytes remain.
+    let task = core::mem::size_of::<(usize, usize)>();
+    let pool = Cell::new(4 * task + 4 * word + 8 * word + WORK);
+    let mut worker = Worker {
+        pool: &pool,
+        pulled: 0,
+        worked: 0,
+    };
+    let result = walk_reserved(&mut worker, 0, &mut Pool(&pool));
+    assert_eq!(
+        result,
+        Err(Refusal::Denied {
+            requested: 16 * word
+        })
+    );
+    assert_eq!(
+        worker.worked, 0,
+        "the enter made no charge after the refusal"
+    );
+    assert_eq!(pool.get(), WORK, "the pool was not drawn on");
+    assert_eq!(worker.pulled, 9, "extend pulled no node after the refusal");
 }

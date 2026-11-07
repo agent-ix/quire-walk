@@ -113,6 +113,12 @@ nothing more: the refused growth allocates nothing, no callback runs after
 it, and the lists are dropped. A refusal found inside `enter` takes
 precedence over the `ControlFlow` that `enter` returns.
 
+The walk cannot interrupt an `enter` that is running: it finishes, and its
+`Break` is discarded. An `enter` that charges or allocates for itself after
+naming children checks `Children::refused()`, or names children with
+`Children::try_push`, which returns the `Refusal`, and stops its own work.
+`extend` stops pulling nodes once a push is refused.
+
 A reservation that admits exactly the total a complete walk charges gives the
 same visit order as `walk`; any smaller total is refused. `walk` is
 `walk_reserved` with a reservation that admits everything, so there is one
@@ -150,7 +156,7 @@ The arena has two properties:
 | `walk(&mut walker, root)` | Runs a walk depth first; returns `ControlFlow<Stop>`. |
 | `walk_reserved(&mut walker, root, &mut reservation)` | As `walk`, asking the reservation before each heap growth; returns `Result<ControlFlow<Stop>, Refusal>`. |
 | `Reservation`, `Denied`, `Refusal` | The caller's say over growth: `reserve(bytes) -> Result<(), Denied>`, its refusal, and why a walk stopped growing. |
-| `Children` | Passed to `enter`; `push` or `extend` to name children in visiting order. |
+| `Children` | Passed to `enter`; `push`, `try_push` or `extend` to name children in visiting order, `refused` to see a refused push. |
 | `Arena<T>` | Children-first node storage: `push`, `get`, `len`, `is_empty`, `iter`, `bottom_up`. |
 | `Id<T>` | Typed, arena-bound handle; `Copy`, `Eq`, `Ord`, `Hash` whatever `T` is. |
 | `Results`, `Computed` | The results seen during `bottom_up`, and the finished set (`get`, `len`, `into_vec`). |
