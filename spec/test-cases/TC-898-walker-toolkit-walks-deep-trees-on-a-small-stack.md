@@ -14,7 +14,7 @@ Verify that the walker toolkit `quire-walk` is a `no_std` shared leaf, that it e
 every node of a 100,000-deep tree in order with typed frames, that a stop
 ends the walk, and that arena order computes bottom-up with no stack.
 
-Scope: FR-356-AC-1, FR-356-AC-2, FR-356-AC-3, FR-356-AC-5.
+Scope: FR-356-AC-1, FR-356-AC-2, FR-356-AC-3, FR-356-AC-5, FR-356-AC-6.
 
 ## Test Procedure
 
@@ -32,6 +32,12 @@ Run steps 2 to 6 on a thread spawned with a 512 KiB stack.
    loop.
 6. Read an id of another arena, in range and past the end, through
    `Arena::get`, the results view and the returned results.
+7. In a test binary with a counting allocator, walk a 41-node tree with
+   `walk_reserved` and an unlimited reservation, recording each reservation
+   request and each allocator request.
+8. Walk it again with a reservation that admits exactly the total of step 7.
+9. Walk it with every smaller total, and walk a 100,000-deep chain on a
+   512 KiB thread with the exact total and with one byte less.
 
 ## Expected Results
 
@@ -42,7 +48,12 @@ Run steps 2 to 6 on a thread spawned with a 512 KiB stack.
 - Step 4: the walk returns the value, and no callback runs after the stop.
 - Step 5: the root's size is 100,000.
 - Step 6: every foreign id reads as `None`.
+- Step 7: the requests equal the allocator's requests, in order.
+- Step 8: the walk completes with the visit order of `walk`.
+- Step 9: each smaller total is refused with no visit after the denial, no
+  extra allocator request and no live byte left; the chain completes with
+  the exact total and is refused with one byte less.
 
 ## Status
 
-Implemented. Step 1 is backed by `make build-no-std` and `tests/it/leaf.rs`; steps 2 to 6 by `tests/it/deep.rs`.
+Implemented. Step 1 is backed by `make build-no-std` and `tests/it/leaf.rs`; steps 2 to 6 by `tests/it/deep.rs`; steps 7 to 9 by `tests/reserved.rs`.

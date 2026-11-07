@@ -51,6 +51,15 @@ traversal instead of a hand-written stack in each walk.
    exited exactly once, that each exit receives the frame its enter pushed,
    that exits come in the reverse order of their enters along each path,
    that a stop ends the walk at once, and that no traversal panics.
+5. **Reserved growth.** The toolkit SHALL offer a walk that asks a caller's
+   reservation before each growth of its task and pending stacks, for the
+   full new capacity in bytes (element size times new capacity), growing by
+   doubling from a minimum of four to exactly that capacity, and SHALL
+   return the refusal instead of walking further. A refused growth SHALL
+   allocate nothing, no callback SHALL run after the refusal, and the
+   walk's stacks SHALL be dropped. The reservation has the shape of
+   `quire-canonical`'s, and the plain walk is this walk with a reservation
+   that admits everything.
 
 ## Acceptance Criteria
 
@@ -61,6 +70,7 @@ traversal instead of a hand-written stack in each walk.
 | FR-356-AC-3 | A bottom-up computation over a 100,000-node arena is one forward loop over the arena and completes on a thread with a 512 KiB stack. | Test (TC-898) |
 | FR-356-AC-4 | `cargo kani` on the toolkit crate verifies every harness: each node entered and exited exactly once, each exit receiving its enter's frame, exits in reverse enter order along each path, a stop ending the walk at once, and no panic, for every tree within the harness bound. | Analysis (Kani, TC-899) |
 | FR-356-AC-5 | An id of another arena of the same node type reads as `None` from `Arena::get`, from the results view during `bottom_up` and from the results it returns, whether its position is in range or past the end, and so does an id of the arena a clone was made from. | Test (TC-898) |
+| FR-356-AC-6 | `walk_reserved` asks its reservation once per growth, with the element size times the new capacity, and the sequence of bytes asked equals the sequence of sizes the allocator receives. A reservation that admits exactly the total of a complete walk's charges gives the visit order of `walk`. Every smaller total is refused with `Refusal::Denied`, with no visit after the denial, only requests the reservation admitted reaching the allocator, and no live byte left from the walk. A 100,000-deep chain does the same on a 512 KiB stack. | Test (TC-898) |
 
 ## Status
 

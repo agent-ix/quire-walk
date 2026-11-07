@@ -100,6 +100,26 @@ A walk over several kinds of node, such as expressions that hold types and types
 that hold expressions, declares an enum for `Node` and one for `Frame`, with a
 variant per kind, so each level carries a frame of its own kind.
 
+## Metered memory
+
+A caller that budgets memory runs `walk_reserved(&mut walker, root, &mut reservation)`.
+Before each growth of the walk's two heap lists (the task stack and the list
+`Children` fills), it calls `Reservation::reserve(bytes)` once, with the full
+new capacity in bytes: element size times new capacity. Lists grow by
+doubling from a minimum of four, to exactly that capacity, so the bytes asked
+are the bytes requested from the allocator. If the reservation returns
+`Denied`, the walk returns `Err(Refusal::Denied { requested })` and does
+nothing more: the refused growth allocates nothing, no callback runs after
+it, and the lists are dropped. A refusal found inside `enter` takes
+precedence over the `ControlFlow` that `enter` returns.
+
+A reservation that admits exactly the total a complete walk charges gives the
+same visit order as `walk`; any smaller total is refused. `walk` is
+`walk_reserved` with a reservation that admits everything, so there is one
+implementation. `Reservation` has the shape, unit and growth policy of
+`quire-canonical`'s, so one caller type can implement both; it is declared here
+because this crate takes no dependency.
+
 ## Bottom-up arena
 
 When a result depends only on a node's children, no stack is needed. An
@@ -128,6 +148,8 @@ The arena has two properties:
 | --- | --- |
 | `Walk` | The trait you implement: `Node`, `Frame`, `Stop`, `enter`, `exit`. |
 | `walk(&mut walker, root)` | Runs a walk depth first; returns `ControlFlow<Stop>`. |
+| `walk_reserved(&mut walker, root, &mut reservation)` | As `walk`, asking the reservation before each heap growth; returns `Result<ControlFlow<Stop>, Refusal>`. |
+| `Reservation`, `Denied`, `Refusal` | The caller's say over growth: `reserve(bytes) -> Result<(), Denied>`, its refusal, and why a walk stopped growing. |
 | `Children` | Passed to `enter`; `push` or `extend` to name children in visiting order. |
 | `Arena<T>` | Children-first node storage: `push`, `get`, `len`, `is_empty`, `iter`, `bottom_up`. |
 | `Id<T>` | Typed, arena-bound handle; `Copy`, `Eq`, `Ord`, `Hash` whatever `T` is. |
