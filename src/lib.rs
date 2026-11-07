@@ -13,6 +13,10 @@
 //!   after its children, and compute over it with one forward loop
 //!   ([`Arena::bottom_up`]). No stack at all.
 //!
+//! A caller that meters memory runs [`walk_reserved`], which asks a
+//! [`Reservation`] for the exact bytes of every growth of the heap stack
+//! before it happens and returns the [`Refusal`] instead of walking on.
+//!
 //! The crate depends on `core` and `alloc` only and has no features, so any
 //! `no_std` crate can depend on it without feature unification pulling in
 //! anything else.
@@ -67,14 +71,17 @@
 //! ```
 
 #![no_std]
+#![forbid(unsafe_code)]
 
 extern crate alloc;
 
 mod arena;
+mod reservation;
 mod walker;
 
 #[cfg(kani)]
 mod proofs;
 
 pub use arena::{Arena, Computed, Id, Results};
-pub use walker::{walk, Children, Walk};
+pub use reservation::{Denied, Refusal, Reservation};
+pub use walker::{walk, walk_reserved, Children, Walk};
