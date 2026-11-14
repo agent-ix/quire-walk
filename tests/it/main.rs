@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Single integration-test binary for `quire-walk`, following the `it`
+//! Single integration-test binary for `filament-walk`, following the `it`
 //! pattern.
 
 mod deep;

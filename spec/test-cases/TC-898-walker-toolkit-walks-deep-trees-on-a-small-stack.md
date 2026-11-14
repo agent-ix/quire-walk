@@ -3,14 +3,14 @@ id: TC-898
 title: "The walker toolkit walks deep trees on a small stack"
 type: TC
 relationships:
-  - target: ix://agent-ix/quire-walk/FR-356
+  - target: ix://agent-ix/filament-walk/FR-356
     type: verifies
 ---
 # TC-898: The walker toolkit walks deep trees on a small stack
 
 ## Description
 
-Verify that the walker toolkit `quire-walk` is a `no_std` shared leaf, that it enters and exits
+Verify that the walker toolkit `filament-walk` is a `no_std` shared leaf, that it enters and exits
 every node of a 100,000-deep tree in order with typed frames, that a stop
 ends the walk, and that arena order computes bottom-up with no stack.
 
@@ -20,7 +20,7 @@ Scope: FR-356-AC-1, FR-356-AC-2, FR-356-AC-3, FR-356-AC-5, FR-356-AC-6.
 
 Run steps 2 to 6 on a thread spawned with a 512 KiB stack.
 
-1. Build `quire-walk` for `thumbv7em-none-eabi`, and list its features
+1. Build `filament-walk` for `thumbv7em-none-eabi`, and list its features
    and its dependency tree.
 2. Walk a 100,000-deep chain, recording each enter and exit with the depth
    carried in its frame.

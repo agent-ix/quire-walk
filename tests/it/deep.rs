@@ -6,8 +6,8 @@
 
 use core::ops::ControlFlow;
 
+use filament_walk::{walk, Arena, Children, Id, Results, Walk};
 use ix_trace_rs::trace;
-use quire_walk::{walk, Arena, Children, Id, Results, Walk};
 
 const DEPTH: usize = 100_000;
 

@@ -3,7 +3,7 @@ id: TC-899
 title: "Kani verifies the walker toolkit"
 type: TC
 relationships:
-  - target: ix://agent-ix/quire-walk/FR-356
+  - target: ix://agent-ix/filament-walk/FR-356
     type: verifies
 ---
 # TC-899: Kani verifies the walker toolkit

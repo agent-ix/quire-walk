@@ -1,5 +1,5 @@
 # =============================================================================
-# quire-walk Makefile
+# filament-walk Makefile
 # =============================================================================
 
 CARGO ?= cargo
@@ -43,7 +43,7 @@ lint:
 test:
 	$(CARGO) test
 
-# `quire-walk` (ADR-011 layer W) is `#![no_std]` with no dependency beyond
+# `filament-walk` (ADR-011 layer W) is `#![no_std]` with no dependency beyond
 # `core` and `alloc`, so it builds for a bare-metal target.
 .PHONY: build-no-std
 build-no-std:
