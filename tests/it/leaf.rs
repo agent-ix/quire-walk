@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! TC-898 step 1 (FR-356-AC-1): the walker toolkit `quire-walk` is a
+//! TC-898 step 1 (FR-356-AC-1): the walker toolkit `filament-walk` is a
 //! shared leaf with no features and no dependency, so its dependency tree
 //! is `core` and `alloc` alone. `make build-no-std` builds it for a
 //! bare-metal target with no `std`.
@@ -24,18 +24,18 @@ fn metadata() -> serde_json::Value {
 
 #[trace("TC-898", "FR-356-AC-1")]
 #[test]
-fn quire_walk_has_no_features_and_no_dependency() {
+fn filament_walk_has_no_features_and_no_dependency() {
     let metadata = metadata();
     let package = metadata["packages"]
         .as_array()
         .expect("a package list")
         .iter()
-        .find(|package| package["name"] == "quire-walk")
-        .expect("quire-walk is in its own metadata");
+        .find(|package| package["name"] == "filament-walk")
+        .expect("filament-walk is in its own metadata");
     assert_eq!(
         package["features"],
         serde_json::json!({}),
-        "quire-walk declares no features"
+        "filament-walk declares no features"
     );
     let shipped: Vec<&serde_json::Value> = package["dependencies"]
         .as_array()
@@ -45,7 +45,7 @@ fn quire_walk_has_no_features_and_no_dependency() {
         .collect();
     assert!(
         shipped.is_empty(),
-        "quire-walk has no normal or build dependency: {shipped:?}"
+        "filament-walk has no normal or build dependency: {shipped:?}"
     );
     let id = package["id"].as_str().expect("a package id");
     let node = metadata["resolve"]["nodes"]
@@ -53,7 +53,7 @@ fn quire_walk_has_no_features_and_no_dependency() {
         .expect("a resolve graph")
         .iter()
         .find(|node| node["id"] == id)
-        .expect("quire-walk is resolved");
+        .expect("filament-walk is resolved");
     let resolved_shipped: Vec<&serde_json::Value> = node["deps"]
         .as_array()
         .expect("resolved dependencies")
@@ -66,11 +66,11 @@ fn quire_walk_has_no_features_and_no_dependency() {
         .collect();
     assert!(
         resolved_shipped.is_empty(),
-        "quire-walk resolves no normal or build dependency: {resolved_shipped:?}"
+        "filament-walk resolves no normal or build dependency: {resolved_shipped:?}"
     );
     assert_eq!(
         node["features"],
         serde_json::json!([]),
-        "the build enables no feature of quire-walk"
+        "the build enables no feature of filament-walk"
     );
 }

@@ -1,4 +1,4 @@
-# quire-walk
+# filament-walk
 
 Shared no_std walker toolkit: an explicit heap stack of typed frames and a children-first arena.
 

@@ -1,16 +1,16 @@
 [package]
-name = "quire-walk"
+name = "filament-walk"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.98"
 description = "The shared no_std walker toolkit -- an explicit heap stack of typed frames with enter and exit callbacks, and an arena that stores each node after its children."
 authors = ["Agent IX <peter@agent-ix.ai>"]
 license = "AGPL-3.0-or-later"
-repository = "https://github.com/agent-ix/quire-walk"
+repository = "https://github.com/agent-ix/filament-walk"
 publish = false
 
 [lib]
-name = "quire_walk"
+name = "filament_walk"
 path = "src/lib.rs"
 
 # A shared leaf: no dependency beyond `core` and `alloc`, and no features, so

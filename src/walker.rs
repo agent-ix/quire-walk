@@ -144,7 +144,7 @@ enum Task<N, F> {
 pub fn walk<W: Walk + ?Sized>(walker: &mut W, root: W::Node) -> ControlFlow<W::Stop> {
     match walk_reserved(walker, root, &mut Unlimited) {
         Ok(flow) => flow,
-        Err(refusal) => panic!("quire-walk: heap stack growth failed: {refusal:?}"),
+        Err(refusal) => panic!("filament-walk: heap stack growth failed: {refusal:?}"),
     }
 }
 

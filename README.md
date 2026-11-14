@@ -1,20 +1,20 @@
-# quire-walk
+# filament-walk
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?logo=discord&logoColor=white)](https://discord.gg/k8DVhuYBR2)
-[![Quire](https://img.shields.io/badge/Quire-Specification%20Language-1F6FEB)](https://github.com/agent-ix/quire-spec-language)
+[![Filament](https://img.shields.io/badge/Filament-Specification%20Language-1F6FEB)](https://github.com/agent-ix/filament-spec-language)
 
-`quire-walk` is a small `no_std` Rust toolkit for traversing deeply nested
+`filament-walk` is a small `no_std` Rust toolkit for traversing deeply nested
 structures. It keeps its own stack of frames on the heap, so native stack use is
 constant at any depth.
 
 You supply handlers for entering and leaving a node, and the toolkit runs the
 traversal in a loop. It also computes bottom-up results over an arena of nodes
-without a stack. The Quire tools use it on deeply nested input, such as an
+without a stack. The Filament tools use it on deeply nested input, such as an
 expression with 100,000 nested operators.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/hero-dark.svg">
-  <img alt="Native recursion keeps one call frame per level of the input, so a 100,000-level tree overflows a 512 KiB stack. quire-walk keeps one typed frame per level on a heap stack and runs enter and exit callbacks from a loop, so native stack use stays constant." src="docs/images/hero-light.svg">
+  <img alt="Native recursion keeps one call frame per level of the input, so a 100,000-level tree overflows a 512 KiB stack. filament-walk keeps one typed frame per level on a heap stack and runs enter and exit callbacks from a loop, so native stack use stays constant." src="docs/images/hero-light.svg">
 </picture>
 
 > **Status: public prerelease.** The API is still changing and the crate is not
@@ -28,7 +28,7 @@ node:
 
 ```rust
 use core::ops::ControlFlow;
-use quire_walk::{walk, Children, Walk};
+use filament_walk::{walk, Children, Walk};
 
 struct Tree(Vec<Vec<usize>>);
 
@@ -172,15 +172,15 @@ stack, and check that the crate has no features and no dependencies.
 [`src/proofs.rs`](src/proofs.rs) holds bounded-model-checking harnesses for
 [Kani](https://github.com/model-checking/kani).
 
-## Quire ecosystem
+## Filament ecosystem
 
-`quire-walk` is at the bottom of the Quire dependency graph.
-It depends on no other Quire repository. [quire-spec-language](https://github.com/agent-ix/quire-spec-language)
+`filament-walk` is at the bottom of the Filament dependency graph.
+It depends on no other Filament repository. [filament-spec-language](https://github.com/agent-ix/filament-spec-language)
 uses it for its deep traversals.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/ecosystem-dark.svg">
-  <img alt="The Quire repositories. The main chain runs from the standard, quire-specification, to the compiler, quire-spec-language, then quire-contract-ir, quire-contract-codegen and quire-contract-runtime. quire-spec-language also feeds quire-protocol, and quire-contract-ir feeds quire-analyze. quire-observation feeds quire-protocol and quire-mltl. Above the chain, quire-driver runs it, quire-integration tests it and quire-verification plans verification. Below it, shared libraries used throughout: quire-eval, quire-exact, quire-semantic-value, quire-walk, quire-canonical and quire-verification-contracts." src="docs/images/ecosystem-light.svg">
+  <img alt="The Filament repositories. The main chain runs from the standard, filament-specification, to the compiler, filament-spec-language, then filament-contract-ir, filament-contract-codegen and filament-contract-runtime. filament-spec-language also feeds filament-protocol, and filament-contract-ir feeds filament-analyze. filament-observation feeds filament-protocol and filament-mltl. Above the chain, filament-driver runs it, filament-integration tests it and filament-verification plans verification. Below it, shared libraries used throughout: filament-eval, filament-exact, filament-semantic-value, filament-walk, quire-canonical and filament-verification-contracts." src="docs/images/ecosystem-light.svg">
 </picture>
 
 ## Building and testing

@@ -12,8 +12,8 @@ use std::alloc::{GlobalAlloc, Layout, System};
 use std::cell::Cell;
 use std::ops::ControlFlow;
 
+use filament_walk::{walk, walk_reserved, Children, Denied, Refusal, Reservation, Walk};
 use ix_trace_rs::trace;
-use quire_walk::{walk, walk_reserved, Children, Denied, Refusal, Reservation, Walk};
 
 /// The most allocator requests one measured walk may make.
 const MAX_REQUESTS: usize = 64;

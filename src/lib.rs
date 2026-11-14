@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! `quire-walk`: a `no_std` walker toolkit for nested structures.
+//! `filament-walk`: a `no_std` walker toolkit for nested structures.
 //!
 //! A walk over a nested structure never uses native recursion in
 //! proportion to its input. It takes one of two shapes:
@@ -28,7 +28,7 @@
 //!
 //! ```
 //! use core::ops::ControlFlow;
-//! use quire_walk::{walk, Children, Walk};
+//! use filament_walk::{walk, Children, Walk};
 //!
 //! struct Tree(Vec<Vec<usize>>);
 //!

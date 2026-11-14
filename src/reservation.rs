@@ -20,7 +20,7 @@ const MIN_CAPACITY: usize = 4;
 /// This is the same shape, unit and growth policy (doubling from a minimum
 /// of four, exact reservation) as `quire-canonical`'s `Reservation`, so one
 /// caller type can implement both. It is declared here rather than imported
-/// because `quire-walk` is a shared leaf with no dependency.
+/// because `filament-walk` is a shared leaf with no dependency.
 pub trait Reservation {
     /// Admit or refuse `bytes` of heap growth.
     ///
